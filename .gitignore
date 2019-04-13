@@ -104,4 +104,4 @@ venv.bak/
 .mypy_cache/
 
 # data
-mnist_data/
+/mnist_data
