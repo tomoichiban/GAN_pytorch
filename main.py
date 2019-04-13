@@ -1,4 +1,5 @@
 import sys
+import os
 
 import torch
 import torch.nn as nn
@@ -17,6 +18,8 @@ from model_fc import *
 from util import *
 
 batch_size = 64
+input_size = 10
+save_path = './gan_save'
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -25,11 +28,10 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 ])
-train_data = dset.MNIST('./mnist_data', train=True, download=False, transform=transform);
+train_data = dset.MNIST('./mnist_data', train=True, download=True, transform=transform);
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
 
-input_size = 10
 
 G = Generator(input_size).to(device)
 D = Discriminator().to(device)
@@ -39,7 +41,10 @@ optim_D = torch.optim.Adam(D.parameters(), lr=0.001, betas=(0.5, 0.99))
 
 loss = nn.BCELoss()
 
-print('Start training:... \n')
+if not os.path.exists(save_path):
+    os.mkdir(save_path)
+
+
 # 训练
 for epoch in range(30):
     for i, data in enumerate(train_loader, 0):
@@ -88,7 +93,7 @@ for epoch in range(30):
             # loss_D = loss_real + loss_fake
             # print('Loss D:', loss_D.item(), 'Loss G:', loss_G.item())
             fake_imgs = to_img(fake_imgs)
-            vutils.save_image(fake_imgs, './gan_save/fake_epoch-%s-i-%s.png' % (epoch, int(i / 50 + 1)))
+            vutils.save_image(fake_imgs, save_path + '/fake_epoch-%s-i-%s.png' % (epoch, int(i / 100 + 1)))
 
     print('epoch:', epoch + 1, 'finish')
 
